@@ -1,0 +1,22 @@
+{
+  "name": "bytes-game",
+  "version": "1.0.0",
+  "description": "Tech stack: - npm - HTML - CSS - JavaScript - Phaser 3",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "vite": "4.5.14",
+    "vitest": "4.0.18"
+  }
+}
