@@ -285,33 +285,9 @@ export class Game extends Phaser.Scene {
         this.physics.pause();
         this.spawnTimer.remove();
 
-        const { width, height } = this.scale;
-
-        // Dark overlay
-        this.add.rectangle(0, 0, width, height, 0x000000, 0.7).setOrigin(0).setDepth(100);
-
-        // Game Over Text
-        this.add.text(width / 2, height / 2 - 50, 'GAME OVER', {
-            fontFamily: 'Courier',
-            fontSize: '64px',
-            color: '#ff0000',
-            stroke: '#000000',
-            strokeThickness: 8
-        }).setOrigin(0.5).setDepth(101);
-
-        const restartButton = this.add.text(width / 2, height / 2 + 50, 'Click to Restart', {
-            fontFamily: 'Courier',
-            fontSize: '32px',
-            color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setOrigin(0.5).setDepth(101);
-
-        restartButton.setInteractive({ useHandCursor: true });
-        restartButton.on('pointerdown', () => {
-            this.scene.restart();
+        // Small delay so they can see the final hit, then show leaderboard
+        this.time.delayedCall(500, () => {
+            this.scene.start('GameOver', { score: this.score });
         });
-        restartButton.on('pointerover', () => restartButton.setColor('#ffff00'));
-        restartButton.on('pointerout', () => restartButton.setColor('#ffffff'));
     }
 }
