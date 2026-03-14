@@ -59,12 +59,12 @@ export class Game extends Phaser.Scene {
         // Use standard images since setCrop works on Images, and we scale them
         this.playerHead = this.add.image(0, 0, 'player')
             .setCrop(0, 0, pw, ph / 2)
-            .setOrigin(0.5, 1) // Origin at bottom center of the top half
+            .setOrigin(0.5, 0.5) // Center origin for seamless overlap
             .setScale(pScale);
 
         this.playerJaw = this.add.image(0, 0, 'player')
             .setCrop(0, ph / 2, pw, ph / 2)
-            .setOrigin(0.5, 0) // Origin at top center of the bottom half
+            .setOrigin(0.5, 0.5) // Center origin for seamless overlap
             .setScale(pScale);
 
         this.playerContainer.add([this.playerHead, this.playerJaw]);
