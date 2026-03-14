@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Boot } from './scenes/Boot';
 import { TitleScreen } from './scenes/TitleScreen';
+import { Game } from './scenes/Game';
 
 const config = {
     type: Phaser.AUTO,
@@ -18,7 +19,7 @@ const config = {
             debug: false
         }
     },
-    scene: [Boot, TitleScreen]
+    scene: [Boot, TitleScreen, Game]
 };
 
 export default new Phaser.Game(config);

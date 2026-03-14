@@ -23,7 +23,7 @@ export class TitleScreen extends Phaser.Scene {
 
         startButton.on('pointerdown', () => {
             console.log('Start game clicked!');
-            // Transition to Game scene when built
+            this.scene.start('Game');
         });
 
         startButton.on('pointerover', () => startButton.setColor('#ffffff'));

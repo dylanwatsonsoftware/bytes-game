@@ -1,5 +1,7 @@
 const DREAMLO_BASE = 'http://dreamlo.com/lb';
-const DREAMLO_KEY = 'Zk9lKzzIkkW5L3fFVzTysQpEM0ihJEWki9toMiUZwoVg';
+const DREAMLO_KEY = 'aMBecWtBKUev4zVAiUF57w43Fv_svCokODbWCp9zvmDg';
+
+// View at http://dreamlo.com/lb/aMBecWtBKUev4zVAiUF57w43Fv_svCokODbWCp9zvmDg
 
 module.exports = async function handler(req, res) {
     const { action } = req.query;
