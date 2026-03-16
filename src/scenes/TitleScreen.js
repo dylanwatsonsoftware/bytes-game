@@ -120,19 +120,21 @@ export class TitleScreen extends Phaser.Scene {
             .setStrokeStyle(1, 0x335577, 0.8);
         container.add(bg);
 
-        const maxSubjectW = panelW - 180 - pad * 2;
+        const dpr = window.devicePixelRatio || 1;
+        const dateColW = 76;
+        const maxSubjectW = panelW - dateColW - pad * 3;
 
         commits.forEach((commit, i) => {
             const y = panelY + pad + rowH * i + rowH / 2;
             const x = panelX - panelW + pad;
 
             const dateText = this.add.text(x, y, commit.date, {
-                fontFamily: 'Courier', fontSize: '12px', color: '#668899',
+                fontFamily: 'Courier', fontSize: '12px', color: '#668899', resolution: dpr,
             }).setOrigin(0, 0.5);
             container.add(dateText);
 
-            const subjObj = this.add.text(x + 178, y, commit.subject, {
-                fontFamily: 'Courier', fontSize: '13px', color: i === 0 ? '#ffdd44' : '#cccccc',
+            const subjObj = this.add.text(x + dateColW + pad, y, commit.subject, {
+                fontFamily: 'Courier', fontSize: '13px', color: i === 0 ? '#ffdd44' : '#cccccc', resolution: dpr,
             }).setOrigin(0, 0.5);
             if (subjObj.width > maxSubjectW) {
                 let t = commit.subject;
