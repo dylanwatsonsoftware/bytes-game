@@ -56,11 +56,11 @@ export class TitleScreen extends Phaser.Scene {
         startButton.setInteractive({ useHandCursor: true });
 
         // Version info in bottom-right corner
-        this.add.text(width - 10, height - 10, `${__COMMIT_DATE__} · ${__COMMIT_SUBJECT__}`, {
+        this.add.text(width - 10, 10, `${__COMMIT_DATE__} · ${__COMMIT_SUBJECT__}`, {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
-        }).setOrigin(1, 1).setAlpha(0.6);
+        }).setOrigin(1, 0).setAlpha(0.6);
 
         // Can click anywhere on screen to start
         this.input.on('pointerdown', () => {
