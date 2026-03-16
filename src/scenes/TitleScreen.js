@@ -56,7 +56,7 @@ export class TitleScreen extends Phaser.Scene {
         startButton.setInteractive({ useHandCursor: true });
 
         // Version info in bottom-right corner
-        this.add.text(width - 10, height - 10, `${__COMMIT_DATE__} · ${__COMMIT_SUBJECT__} by ${__COMMIT_AUTHOR__}`, {
+        this.add.text(width - 10, height - 10, `${__COMMIT_DATE__} · ${__COMMIT_SUBJECT__}`, {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
