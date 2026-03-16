@@ -27,7 +27,6 @@ export class TitleScreen extends Phaser.Scene {
             resolution: dpr,
         }).setOrigin(0.5);
 
-        // Simple pulsing animation for title
         this.tweens.add({
             targets: titleText,
             scaleX: 1.05,
@@ -47,7 +46,6 @@ export class TitleScreen extends Phaser.Scene {
             resolution: dpr,
         }).setOrigin(0.5);
 
-        // Blink start text
         this.tweens.add({
             targets: startButton,
             alpha: 0.5,
@@ -58,103 +56,109 @@ export class TitleScreen extends Phaser.Scene {
 
         startButton.setInteractive({ useHandCursor: true });
 
-        // Version info in top-right corner
-        const dateLabel = this.add.text(width - 10, 10, __COMMIT_DATE__, {
-            fontFamily: 'Courier',
-            fontSize: '14px',
-            color: '#ffffff',
-            resolution: dpr,
-        }).setOrigin(1, 0).setAlpha(0.6).setInteractive({ useHandCursor: true });
+        // Version label + changelog as DOM overlay
+        this.createVersionDOM();
 
-        const maxSubjectWidth = width - 20;
-        const subjectObj = this.add.text(width - 10, 28, __COMMIT_SUBJECT__, {
-            fontFamily: 'Courier',
-            fontSize: '14px',
-            color: '#ffffff',
-            resolution: dpr,
-        }).setOrigin(1, 0).setAlpha(0.6);
-        if (subjectObj.width > maxSubjectWidth) {
-            let truncated = __COMMIT_SUBJECT__;
-            while (truncated.length > 0 && subjectObj.width > maxSubjectWidth) {
-                truncated = truncated.slice(0, -1);
-                subjectObj.setText(truncated + '…');
-            }
-        }
-
-        // Changelog popup (hidden by default)
-        this.changelogOpen = false;
-        this.changelogObjects = this.buildChangelogPopup(width, dpr);
-        this.changelogObjects.forEach(o => o.setVisible(false));
-
-        dateLabel.on('pointerover', () => dateLabel.setAlpha(1));
-        dateLabel.on('pointerout', () => dateLabel.setAlpha(0.6));
-        dateLabel.on('pointerdown', () => {
-            this.changelogJustToggled = true;
-            this.changelogOpen = !this.changelogOpen;
-            this.changelogObjects.forEach(o => o.setVisible(this.changelogOpen));
-        });
-
-        // Can click anywhere on screen to start (or close changelog)
+        // Click anywhere to start (changelog clicks are handled in DOM)
         this.input.on('pointerdown', () => {
-            if (this.changelogJustToggled) {
-                this.changelogJustToggled = false;
-                return;
-            }
             if (this.changelogOpen) {
-                this.changelogOpen = false;
-                this.changelogObjects.forEach(o => o.setVisible(false));
+                this.setChangelogVisible(false);
                 return;
             }
             this.scene.start('Game');
         });
     }
 
-    buildChangelogPopup(width, dpr) {
-        const pad = 14;
-        const rowH = 36;
-        const commits = __RECENT_COMMITS__;
-        const panelW = width - 20;
-        const panelH = pad * 2 + commits.length * rowH;
-        const panelX = width - 10;
-        const panelY = 48;
-        const objects = [];
+    createVersionDOM() {
+        this.changelogOpen = false;
 
-        const bg = this.add.rectangle(panelX, panelY, panelW, panelH, 0x000000, 0.88)
-            .setOrigin(1, 0)
-            .setStrokeStyle(1, 0x335577, 0.8)
-            .setDepth(10);
-        objects.push(bg);
-
-        const dateColW = 76;
-        const maxSubjectW = panelW - dateColW - pad * 3;
-
-        commits.forEach((commit, i) => {
-            const y = panelY + pad + rowH * i + rowH / 2;
-            const x = panelX - panelW + pad;
-
-            const dateText = this.add.text(x, y, commit.date, {
-                fontFamily: 'Courier', fontSize: '12px', color: '#668899', resolution: dpr,
-            }).setOrigin(0, 0.5).setDepth(10);
-            objects.push(dateText);
-
-            const subjObj = this.add.text(x + dateColW + pad, y, commit.subject, {
-                fontFamily: 'Courier', fontSize: '13px', color: i === 0 ? '#ffdd44' : '#cccccc', resolution: dpr,
-            }).setOrigin(0, 0.5).setDepth(10);
-            if (subjObj.width > maxSubjectW) {
-                let t = commit.subject;
-                while (t.length > 0 && subjObj.width > maxSubjectW) {
-                    t = t.slice(0, -1);
-                    subjObj.setText(t + '…');
-                }
-            }
-            objects.push(subjObj);
+        const wrapper = document.createElement('div');
+        Object.assign(wrapper.style, {
+            position: 'absolute',
+            top: '8px',
+            right: '10px',
+            fontFamily: 'Courier, monospace',
+            fontSize: '13px',
+            color: 'rgba(255,255,255,0.65)',
+            textAlign: 'right',
+            zIndex: '1000',
+            userSelect: 'none',
+            lineHeight: '1.4',
         });
 
-        return objects;
+        const label = document.createElement('div');
+        label.style.cursor = 'pointer';
+        label.innerHTML = `${__COMMIT_DATE__}<br><span style="display:block;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${__COMMIT_SUBJECT__}</span>`;
+        label.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.setChangelogVisible(!this.changelogOpen);
+        });
+        label.addEventListener('mouseenter', () => label.style.color = 'rgba(255,255,255,1)');
+        label.addEventListener('mouseleave', () => label.style.color = 'rgba(255,255,255,0.65)');
+
+        const popup = document.createElement('div');
+        Object.assign(popup.style, {
+            display: 'none',
+            marginTop: '6px',
+            background: 'rgba(0,0,0,0.88)',
+            border: '1px solid #335577',
+            borderRadius: '4px',
+            padding: '8px 0',
+            textAlign: 'left',
+            minWidth: 'min(420px, calc(100vw - 20px))',
+        });
+
+        __RECENT_COMMITS__.forEach((commit, i) => {
+            const row = document.createElement('div');
+            Object.assign(row.style, {
+                display: 'flex',
+                gap: '10px',
+                padding: '5px 12px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+            });
+
+            const date = document.createElement('span');
+            date.textContent = commit.date;
+            date.style.color = '#668899';
+            date.style.flexShrink = '0';
+
+            const subject = document.createElement('span');
+            subject.textContent = commit.subject;
+            subject.style.color = i === 0 ? '#ffdd44' : '#cccccc';
+            subject.style.overflow = 'hidden';
+            subject.style.textOverflow = 'ellipsis';
+
+            row.appendChild(date);
+            row.appendChild(subject);
+            popup.appendChild(row);
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(popup);
+        document.body.appendChild(wrapper);
+
+        this.versionDOM = wrapper;
+        this.changelogPopupDOM = popup;
+    }
+
+    setChangelogVisible(visible) {
+        this.changelogOpen = visible;
+        this.changelogPopupDOM.style.display = visible ? 'block' : 'none';
+    }
+
+    removeVersionDOM() {
+        if (this.versionDOM && this.versionDOM.parentNode) {
+            this.versionDOM.parentNode.removeChild(this.versionDOM);
+            this.versionDOM = null;
+        }
+    }
+
+    shutdown() {
+        this.removeVersionDOM();
     }
 
     update(time, delta) {
-        // Slowly scroll the background on the title screen too
         if (this.bg) {
             this.bg.tilePositionX += 0.5;
         }
