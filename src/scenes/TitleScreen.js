@@ -65,6 +65,7 @@ export class TitleScreen extends Phaser.Scene {
                 this.setChangelogVisible(false);
                 return;
             }
+            this.removeVersionDOM();
             this.scene.start('Game');
         });
     }
@@ -76,6 +77,7 @@ export class TitleScreen extends Phaser.Scene {
         Object.assign(wrapper.style, {
             position: 'absolute',
             top: '8px',
+            left: '10px',
             right: '10px',
             fontFamily: 'Courier, monospace',
             fontSize: '13px',
@@ -84,10 +86,12 @@ export class TitleScreen extends Phaser.Scene {
             zIndex: '1000',
             userSelect: 'none',
             lineHeight: '1.4',
+            pointerEvents: 'none',
         });
 
         const label = document.createElement('div');
         label.style.cursor = 'pointer';
+        label.style.pointerEvents = 'auto';
         label.innerHTML = `${__COMMIT_DATE__}<br><span style="display:block;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${__COMMIT_SUBJECT__}</span>`;
         label.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -105,7 +109,7 @@ export class TitleScreen extends Phaser.Scene {
             borderRadius: '4px',
             padding: '8px 0',
             textAlign: 'left',
-            minWidth: 'min(420px, calc(100vw - 20px))',
+            pointerEvents: 'auto',
         });
 
         __RECENT_COMMITS__.forEach((commit, i) => {
