@@ -83,15 +83,15 @@ export class TitleScreen extends Phaser.Scene {
 
         // Changelog popup (hidden by default)
         this.changelogOpen = false;
-        this.changelogContainer = this.buildChangelogPopup(width);
-        this.changelogContainer.setVisible(false);
+        this.changelogObjects = this.buildChangelogPopup(width, dpr);
+        this.changelogObjects.forEach(o => o.setVisible(false));
 
         dateLabel.on('pointerover', () => dateLabel.setAlpha(1));
         dateLabel.on('pointerout', () => dateLabel.setAlpha(0.6));
         dateLabel.on('pointerdown', () => {
             this.changelogJustToggled = true;
             this.changelogOpen = !this.changelogOpen;
-            this.changelogContainer.setVisible(this.changelogOpen);
+            this.changelogObjects.forEach(o => o.setVisible(this.changelogOpen));
         });
 
         // Can click anywhere on screen to start (or close changelog)
@@ -102,14 +102,14 @@ export class TitleScreen extends Phaser.Scene {
             }
             if (this.changelogOpen) {
                 this.changelogOpen = false;
-                this.changelogContainer.setVisible(false);
+                this.changelogObjects.forEach(o => o.setVisible(false));
                 return;
             }
             this.scene.start('Game');
         });
     }
 
-    buildChangelogPopup(width) {
+    buildChangelogPopup(width, dpr) {
         const pad = 14;
         const rowH = 36;
         const commits = __RECENT_COMMITS__;
@@ -117,15 +117,14 @@ export class TitleScreen extends Phaser.Scene {
         const panelH = pad * 2 + commits.length * rowH;
         const panelX = width - 10;
         const panelY = 48;
-
-        const container = this.add.container(0, 0).setDepth(10);
+        const objects = [];
 
         const bg = this.add.rectangle(panelX, panelY, panelW, panelH, 0x000000, 0.88)
             .setOrigin(1, 0)
-            .setStrokeStyle(1, 0x335577, 0.8);
-        container.add(bg);
+            .setStrokeStyle(1, 0x335577, 0.8)
+            .setDepth(10);
+        objects.push(bg);
 
-        const dpr = window.devicePixelRatio || 1;
         const dateColW = 76;
         const maxSubjectW = panelW - dateColW - pad * 3;
 
@@ -135,12 +134,12 @@ export class TitleScreen extends Phaser.Scene {
 
             const dateText = this.add.text(x, y, commit.date, {
                 fontFamily: 'Courier', fontSize: '12px', color: '#668899', resolution: dpr,
-            }).setOrigin(0, 0.5);
-            container.add(dateText);
+            }).setOrigin(0, 0.5).setDepth(10);
+            objects.push(dateText);
 
             const subjObj = this.add.text(x + dateColW + pad, y, commit.subject, {
                 fontFamily: 'Courier', fontSize: '13px', color: i === 0 ? '#ffdd44' : '#cccccc', resolution: dpr,
-            }).setOrigin(0, 0.5);
+            }).setOrigin(0, 0.5).setDepth(10);
             if (subjObj.width > maxSubjectW) {
                 let t = commit.subject;
                 while (t.length > 0 && subjObj.width > maxSubjectW) {
@@ -148,10 +147,10 @@ export class TitleScreen extends Phaser.Scene {
                     subjObj.setText(t + '…');
                 }
             }
-            container.add(subjObj);
+            objects.push(subjObj);
         });
 
-        return container;
+        return objects;
     }
 
     update(time, delta) {
