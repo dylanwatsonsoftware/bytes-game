@@ -55,12 +55,26 @@ export class TitleScreen extends Phaser.Scene {
 
         startButton.setInteractive({ useHandCursor: true });
 
-        // Version info in bottom-right corner
-        this.add.text(width - 10, 10, `${__COMMIT_DATE__} · ${__COMMIT_SUBJECT__}`, {
+        // Version info in top-right corner
+        this.add.text(width - 10, 10, __COMMIT_DATE__, {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
         }).setOrigin(1, 0).setAlpha(0.6);
+
+        const maxSubjectWidth = width - 20;
+        const subjectObj = this.add.text(width - 10, 28, __COMMIT_SUBJECT__, {
+            fontFamily: 'Courier',
+            fontSize: '14px',
+            color: '#ffffff',
+        }).setOrigin(1, 0).setAlpha(0.6);
+        if (subjectObj.width > maxSubjectWidth) {
+            let truncated = __COMMIT_SUBJECT__;
+            while (truncated.length > 0 && subjectObj.width > maxSubjectWidth) {
+                truncated = truncated.slice(0, -1);
+                subjectObj.setText(truncated + '…');
+            }
+        }
 
         // Can click anywhere on screen to start
         this.input.on('pointerdown', () => {
