@@ -202,21 +202,28 @@ export class GameOver extends Phaser.Scene {
             stroke: '#000', strokeThickness: 1, resolution: dpr
         }).setOrigin(0.5).setDepth(1);
 
-        // Table header
+        // Table layout — stretch to screen width with padding
         const tableY = 100;
         const rowH = 36;
-        const col = { rank: cx - 130, name: cx - 80, score: cx + 60, flag: cx + 130 };
+        const pad = 20;
+        const col = {
+            rank:  pad + 14,
+            name:  pad + 38,
+            score: width - pad - 50,
+            flag:  width - pad - 10,
+        };
+        const maxNameWidth = col.score - 14 - col.name;
 
         const headerStyle = { fontFamily: 'Courier', fontSize: '16px', fill: '#668899', fontStyle: 'bold', resolution: dpr };
         this.add.text(col.rank, tableY, '#', headerStyle).setOrigin(0.5).setDepth(1);
         this.add.text(col.name, tableY, 'NAME', headerStyle).setOrigin(0, 0.5).setDepth(1);
-        this.add.text(col.score, tableY, 'SCORE', headerStyle).setOrigin(0.5).setDepth(1);
+        this.add.text(col.score, tableY, 'SCORE', headerStyle).setOrigin(1, 0.5).setDepth(1);
         this.add.text(col.flag, tableY, '', headerStyle).setOrigin(0.5).setDepth(1);
 
         // Divider line
         const g = this.add.graphics().setDepth(1);
         g.lineStyle(1, 0x335577, 0.6);
-        g.lineBetween(cx - 150, tableY + 14, cx + 150, tableY + 14);
+        g.lineBetween(pad, tableY + 14, width - pad, tableY + 14);
 
         // Rows
         scores.forEach((entry, i) => {
@@ -228,7 +235,7 @@ export class GameOver extends Phaser.Scene {
 
             // Highlight row background for player
             if (isPlayer) {
-                this.add.rectangle(cx, y, 310, rowH - 4, 0xffdd44, 0.08)
+                this.add.rectangle(cx, y, width - pad * 2, rowH - 4, 0xffdd44, 0.08)
                     .setOrigin(0.5).setDepth(1);
             }
 
@@ -239,8 +246,18 @@ export class GameOver extends Phaser.Scene {
             });
 
             this.add.text(col.rank, y, `${entry.rank}`, rowStyle(rankColor)).setOrigin(0.5).setDepth(2);
-            this.add.text(col.name, y, entry.name, rowStyle(nameColor)).setOrigin(0, 0.5).setDepth(2);
-            this.add.text(col.score, y, `${entry.score}`, rowStyle(scoreColor)).setOrigin(0.5).setDepth(2);
+
+            // Truncate name with ellipsis if it exceeds the available column width
+            const nameObj = this.add.text(col.name, y, entry.name, rowStyle(nameColor)).setOrigin(0, 0.5).setDepth(2);
+            if (nameObj.width > maxNameWidth) {
+                let truncated = entry.name;
+                while (truncated.length > 0 && nameObj.width > maxNameWidth) {
+                    truncated = truncated.slice(0, -1);
+                    nameObj.setText(truncated + '…');
+                }
+            }
+
+            this.add.text(col.score, y, `${entry.score}`, rowStyle(scoreColor)).setOrigin(1, 0.5).setDepth(2);
             this.add.text(col.flag, y, entry.flag, { fontSize: '22px', resolution: dpr }).setOrigin(0.5).setDepth(2);
         });
 
