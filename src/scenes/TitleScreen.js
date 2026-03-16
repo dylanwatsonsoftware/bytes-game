@@ -55,6 +55,14 @@ export class TitleScreen extends Phaser.Scene {
 
         startButton.setInteractive({ useHandCursor: true });
 
+        // Version date in bottom-right corner
+        this.add.text(width - 10, height - 10, __COMMIT_DATE__, {
+            fontFamily: 'Courier',
+            fontSize: '14px',
+            color: '#ffffff',
+            alpha: 0.6,
+        }).setOrigin(1, 1).setAlpha(0.6);
+
         // Can click anywhere on screen to start
         this.input.on('pointerdown', () => {
             console.log('Start game clicked!');
