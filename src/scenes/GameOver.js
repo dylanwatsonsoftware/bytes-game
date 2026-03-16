@@ -14,7 +14,7 @@ export class GameOver extends Phaser.Scene {
     create() {
         const { width, height } = this.scale;
         const cx = width / 2;
-        this.dpr = Math.max(window.devicePixelRatio || 1, 2) * 2;
+        this.dpr = window.devicePixelRatio || 1;
 
         // Dark overlay
         this.add.rectangle(cx, height / 2, width, height, 0x000000, 0.75).setDepth(0);
