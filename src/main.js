@@ -6,6 +6,7 @@ import { GameOver } from './scenes/GameOver';
 
 const config = {
     type: Phaser.AUTO,
+    resolution: window.devicePixelRatio || 1,
     scale: {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,

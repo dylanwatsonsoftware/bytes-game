@@ -7,6 +7,7 @@ export class TitleScreen extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
+        const dpr = window.devicePixelRatio || 1;
 
         // Background
         this.bg = this.add.tileSprite(0, 0, width, height, 'bg').setOrigin(0, 0);
@@ -22,7 +23,8 @@ export class TitleScreen extends Phaser.Scene {
             color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 8,
-            shadow: { offsetX: 3, offsetY: 3, color: '#000000', blur: 5, fill: true }
+            shadow: { offsetX: 3, offsetY: 3, color: '#000000', blur: 5, fill: true },
+            resolution: dpr,
         }).setOrigin(0.5);
 
         // Simple pulsing animation for title
@@ -41,7 +43,8 @@ export class TitleScreen extends Phaser.Scene {
             fontSize: '28px',
             color: '#ffffff',
             stroke: '#000000',
-            strokeThickness: 4
+            strokeThickness: 4,
+            resolution: dpr,
         }).setOrigin(0.5);
 
         // Blink start text
@@ -60,6 +63,7 @@ export class TitleScreen extends Phaser.Scene {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
+            resolution: dpr,
         }).setOrigin(1, 0).setAlpha(0.6).setInteractive({ useHandCursor: true });
 
         const maxSubjectWidth = width - 20;
@@ -67,6 +71,7 @@ export class TitleScreen extends Phaser.Scene {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
+            resolution: dpr,
         }).setOrigin(1, 0).setAlpha(0.6);
         if (subjectObj.width > maxSubjectWidth) {
             let truncated = __COMMIT_SUBJECT__;
