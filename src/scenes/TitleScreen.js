@@ -56,11 +56,11 @@ export class TitleScreen extends Phaser.Scene {
         startButton.setInteractive({ useHandCursor: true });
 
         // Version info in top-right corner
-        this.add.text(width - 10, 10, __COMMIT_DATE__, {
+        const dateLabel = this.add.text(width - 10, 10, __COMMIT_DATE__, {
             fontFamily: 'Courier',
             fontSize: '14px',
             color: '#ffffff',
-        }).setOrigin(1, 0).setAlpha(0.6);
+        }).setOrigin(1, 0).setAlpha(0.6).setInteractive({ useHandCursor: true });
 
         const maxSubjectWidth = width - 20;
         const subjectObj = this.add.text(width - 10, 28, __COMMIT_SUBJECT__, {
@@ -76,11 +76,71 @@ export class TitleScreen extends Phaser.Scene {
             }
         }
 
-        // Can click anywhere on screen to start
+        // Changelog popup (hidden by default)
+        this.changelogOpen = false;
+        this.changelogContainer = this.buildChangelogPopup(width);
+        this.changelogContainer.setVisible(false);
+
+        dateLabel.on('pointerover', () => dateLabel.setAlpha(1));
+        dateLabel.on('pointerout', () => dateLabel.setAlpha(0.6));
+        dateLabel.on('pointerdown', (pointer) => {
+            pointer.event.stopPropagation();
+            this.changelogOpen = !this.changelogOpen;
+            this.changelogContainer.setVisible(this.changelogOpen);
+        });
+
+        // Can click anywhere on screen to start (or close changelog)
         this.input.on('pointerdown', () => {
-            console.log('Start game clicked!');
+            if (this.changelogOpen) {
+                this.changelogOpen = false;
+                this.changelogContainer.setVisible(false);
+                return;
+            }
             this.scene.start('Game');
         });
+    }
+
+    buildChangelogPopup(width) {
+        const pad = 14;
+        const rowH = 36;
+        const commits = __RECENT_COMMITS__;
+        const panelW = width - 20;
+        const panelH = pad * 2 + commits.length * rowH;
+        const panelX = width - 10;
+        const panelY = 48;
+
+        const container = this.add.container(0, 0).setDepth(10);
+
+        const bg = this.add.rectangle(panelX, panelY, panelW, panelH, 0x000000, 0.88)
+            .setOrigin(1, 0)
+            .setStrokeStyle(1, 0x335577, 0.8);
+        container.add(bg);
+
+        const maxSubjectW = panelW - 180 - pad * 2;
+
+        commits.forEach((commit, i) => {
+            const y = panelY + pad + rowH * i + rowH / 2;
+            const x = panelX - panelW + pad;
+
+            const dateText = this.add.text(x, y, commit.date, {
+                fontFamily: 'Courier', fontSize: '12px', color: '#668899',
+            }).setOrigin(0, 0.5);
+            container.add(dateText);
+
+            const subjObj = this.add.text(x + 178, y, commit.subject, {
+                fontFamily: 'Courier', fontSize: '13px', color: i === 0 ? '#ffdd44' : '#cccccc',
+            }).setOrigin(0, 0.5);
+            if (subjObj.width > maxSubjectW) {
+                let t = commit.subject;
+                while (t.length > 0 && subjObj.width > maxSubjectW) {
+                    t = t.slice(0, -1);
+                    subjObj.setText(t + '…');
+                }
+            }
+            container.add(subjObj);
+        });
+
+        return container;
     }
 
     update(time, delta) {
