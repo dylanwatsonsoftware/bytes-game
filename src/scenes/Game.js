@@ -72,9 +72,8 @@ export class Game extends Phaser.Scene {
         // Input Setup
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        // Virtual Joystick setup for mobile
-        this.input.addPointer(1); // Ensure we can handle multi-touch
-        this.joystick = { base: null, thumb: null, active: false, distance: 0, angle: 0, pointer: null };
+        // Swipe controls for mobile
+        this.swipe = { active: false, startY: 0, currentY: 0 };
         this.setupMobileControls();
 
         // Food groups
@@ -108,10 +107,10 @@ export class Game extends Phaser.Scene {
             this.playerContainer.body.setVelocityY(-speed);
         } else if (this.cursors.down.isDown) {
             this.playerContainer.body.setVelocityY(speed);
-        } else if (this.joystick.active) {
-            // Virtual joystick movement (Y-axis only)
-            const joyY = Math.sin(this.joystick.angle) * (this.joystick.distance / 50);
-            this.playerContainer.body.setVelocityY(joyY * speed);
+        } else if (this.swipe.active) {
+            const dy = this.swipe.currentY - this.swipe.startY;
+            const factor = Phaser.Math.Clamp(dy / 80, -1, 1);
+            this.playerContainer.body.setVelocityY(factor * speed);
         }
 
         // Cleanup offscreen items
@@ -124,64 +123,21 @@ export class Game extends Phaser.Scene {
     }
 
     setupMobileControls() {
-        const { height } = this.scale;
-        const padding = 20;
-        const baseRadius = 60;
-        const thumbRadius = 30;
-
-        const jX = padding + baseRadius + 20;
-        const jY = height - padding - baseRadius - 20;
-
-        this.joystick.base = this.add.circle(jX, jY, baseRadius, 0xffffff, 0.1)
-            .setScrollFactor(0)
-            .setDepth(100)
-            .setInteractive();
-
-        this.joystick.thumb = this.add.circle(jX, jY, thumbRadius, 0xffffff, 0.3)
-            .setScrollFactor(0)
-            .setDepth(100);
-
-        this.joystick.base.on('pointerdown', (pointer) => {
-            this.joystick.pointer = pointer;
-            this.handleJoystickMove(pointer);
+        this.input.on('pointerdown', (pointer) => {
+            this.swipe.active = true;
+            this.swipe.startY = pointer.y;
+            this.swipe.currentY = pointer.y;
         });
 
         this.input.on('pointermove', (pointer) => {
-            if (this.joystick.pointer && this.joystick.pointer.id === pointer.id) {
-                this.handleJoystickMove(pointer);
+            if (this.swipe.active) {
+                this.swipe.currentY = pointer.y;
             }
         });
 
-        this.input.on('pointerup', (pointer) => {
-            if (this.joystick.pointer && this.joystick.pointer.id === pointer.id) {
-                this.resetJoystick();
-            }
+        this.input.on('pointerup', () => {
+            this.swipe.active = false;
         });
-    }
-
-    handleJoystickMove(pointer) {
-        const base = this.joystick.base;
-        const dx = pointer.x - base.x;
-        const dy = pointer.y - base.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const maxDistance = 60;
-
-        this.joystick.active = true;
-        this.joystick.distance = Math.min(distance, maxDistance);
-        this.joystick.angle = Math.atan2(dy, dx);
-
-        const thumbX = base.x + Math.cos(this.joystick.angle) * this.joystick.distance;
-        const thumbY = base.y + Math.sin(this.joystick.angle) * this.joystick.distance;
-
-        this.joystick.thumb.setPosition(thumbX, thumbY);
-    }
-
-    resetJoystick() {
-        if (!this.joystick.base) return;
-        this.joystick.active = false;
-        this.joystick.distance = 0;
-        this.joystick.pointer = null;
-        this.joystick.thumb.setPosition(this.joystick.base.x, this.joystick.base.y);
     }
 
     spawnItem() {
@@ -227,25 +183,27 @@ export class Game extends Phaser.Scene {
     }
 
     animateChomp() {
-        // Quick Pacman/South Park split jaw animation!
         if (this._isChomping) return;
         this._isChomping = true;
 
+        // Rotate each half around the mouth seam (center of the full image) so it looks like a mouth opening
         this.tweens.add({
             targets: this.playerHead,
-            y: -5,
+            rotation: -0.3,
             duration: 100,
             yoyo: true,
-            ease: 'Sine.easeInOut'
+            ease: 'Sine.easeInOut',
+            onComplete: () => { this.playerHead.rotation = 0; }
         });
 
         this.tweens.add({
             targets: this.playerJaw,
-            y: 5,
+            rotation: 0.3,
             duration: 100,
             yoyo: true,
             ease: 'Sine.easeInOut',
             onComplete: () => {
+                this.playerJaw.rotation = 0;
                 this._isChomping = false;
             }
         });
