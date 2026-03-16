@@ -83,14 +83,18 @@ export class TitleScreen extends Phaser.Scene {
 
         dateLabel.on('pointerover', () => dateLabel.setAlpha(1));
         dateLabel.on('pointerout', () => dateLabel.setAlpha(0.6));
-        dateLabel.on('pointerdown', (pointer) => {
-            pointer.event.stopPropagation();
+        dateLabel.on('pointerdown', () => {
+            this.changelogJustToggled = true;
             this.changelogOpen = !this.changelogOpen;
             this.changelogContainer.setVisible(this.changelogOpen);
         });
 
         // Can click anywhere on screen to start (or close changelog)
         this.input.on('pointerdown', () => {
+            if (this.changelogJustToggled) {
+                this.changelogJustToggled = false;
+                return;
+            }
             if (this.changelogOpen) {
                 this.changelogOpen = false;
                 this.changelogContainer.setVisible(false);
