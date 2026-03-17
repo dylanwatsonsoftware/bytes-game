@@ -109,9 +109,30 @@ export class Game extends Phaser.Scene {
             this.playerContainer.body.setVelocityY(factor * speed);
         }
 
-        // Cleanup offscreen items
+        // Update golden item effects and cleanup offscreen items
         this.foods.children.each((child) => {
-            if (child && child.x < -100) child.destroy();
+            if (!child) return;
+            if (child.x < -100) {
+                if (child.goldenHalo) child.goldenHalo.destroy();
+                if (child.goldenLabel) child.goldenLabel.destroy();
+                child.destroy();
+                return;
+            }
+            if (child.isGolden) {
+                // Spin orbiting dots
+                child.haloAngle = (child.haloAngle || 0) + 4;
+                const g = child.goldenHalo;
+                g.clear();
+                for (let i = 0; i < 6; i++) {
+                    const angle = Phaser.Math.DegToRad(child.haloAngle + i * 60);
+                    const sx = child.x + Math.cos(angle) * 58;
+                    const sy = child.y + Math.sin(angle) * 58;
+                    const bright = i % 2 === 0 ? 0xFFEE00 : 0xFFFFAA;
+                    g.fillStyle(bright, 1);
+                    g.fillCircle(sx, sy, i % 2 === 0 ? 7 : 4);
+                }
+                if (child.goldenLabel) child.goldenLabel.setPosition(child.x, child.y - 72);
+            }
         });
         this.junkFoods.children.each((child) => {
             if (child && child.x < -100) child.destroy();
@@ -169,16 +190,28 @@ export class Game extends Phaser.Scene {
         if (isGolden) {
             item.isGolden = true;
             item.setTint(0xFFD700);
-            // Pulse scale to stand out
+            item.haloAngle = 0;
+
+            // Dramatic scale pulse
+            const baseScale = item.scaleX;
             this.tweens.add({
                 targets: item,
-                scaleX: item.scaleX * 1.18,
-                scaleY: item.scaleY * 1.18,
-                duration: 350,
+                scaleX: baseScale * 1.35,
+                scaleY: baseScale * 1.35,
+                duration: 280,
                 yoyo: true,
                 repeat: -1,
                 ease: 'Sine.easeInOut'
             });
+
+            // Orbiting sparkle dots
+            item.goldenHalo = this.add.graphics().setDepth(4);
+
+            // ★ 2× label above the item
+            item.goldenLabel = this.add.text(item.x, item.y - 70, '★ 2×', {
+                fontFamily: 'Courier', fontSize: '20px', color: '#FFD700',
+                fontStyle: 'bold', stroke: '#000000', strokeThickness: 3,
+            }).setOrigin(0.5).setDepth(5);
         }
 
         // Physics settings
@@ -226,6 +259,8 @@ export class Game extends Phaser.Scene {
     eatFood(player, food) {
         const isGolden = food.isGolden;
         const points = isGolden ? 20 : 10;
+        if (food.goldenHalo) food.goldenHalo.destroy();
+        if (food.goldenLabel) food.goldenLabel.destroy();
         food.destroy();
         this.score += points;
         this.scoreText.setText(`Score: ${this.score}`);
