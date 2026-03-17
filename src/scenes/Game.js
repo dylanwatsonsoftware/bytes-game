@@ -159,6 +159,9 @@ export class Game extends Phaser.Scene {
         // Random Y position, keep within screen bounds roughly
         const spawnY = Phaser.Math.Between(100, height - 100);
 
+        // 15% chance of golden item (healthy only)
+        const isGolden = !isJunk && Math.random() < 0.15;
+
         const group = isJunk ? this.junkFoods : this.foods;
         const item = group.create(width + 100, spawnY, key);
 
@@ -166,6 +169,21 @@ export class Game extends Phaser.Scene {
         const dummy = this.textures.get(key).getSourceImage();
         const targetSize = isJunk ? 120 : 100;
         item.setScale(targetSize / dummy.height);
+
+        if (isGolden) {
+            item.isGolden = true;
+            item.setTint(0xFFD700);
+            // Pulse scale to stand out
+            this.tweens.add({
+                targets: item,
+                scaleX: item.scaleX * 1.18,
+                scaleY: item.scaleY * 1.18,
+                duration: 350,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        }
 
         // Physics settings
         item.body.setSize(item.width * 0.6, item.height * 0.6); // Slightly forgiving hitbox
@@ -210,17 +228,36 @@ export class Game extends Phaser.Scene {
     }
 
     eatFood(player, food) {
+        const isGolden = food.isGolden;
+        const points = isGolden ? 20 : 10;
         food.destroy();
-        this.score += 10;
+        this.score += points;
         this.scoreText.setText(`Score: ${this.score}`);
         this.animateChomp();
 
-        // Quick flash effect for points
-        this.scoreText.setColor('#00ff00');
+        // Flash gold for golden items, green for normal
+        this.scoreText.setColor(isGolden ? '#FFD700' : '#00ff00');
         this.time.delayedCall(200, () => {
             if (this.scoreText && this.scoreText.active) {
                 this.scoreText.setColor('#ffffff');
             }
+        });
+
+        // Floating +points text
+        const px = this.playerContainer.x + 30;
+        const py = this.playerContainer.y - 40;
+        const floatText = this.add.text(px, py, `+${points}`, {
+            fontFamily: 'Courier', fontSize: '28px',
+            color: isGolden ? '#FFD700' : '#00ff00',
+            stroke: '#000000', strokeThickness: 3,
+        }).setDepth(20);
+        this.tweens.add({
+            targets: floatText,
+            y: py - 60,
+            alpha: 0,
+            duration: 700,
+            ease: 'Cubic.easeOut',
+            onComplete: () => floatText.destroy(),
         });
     }
 
