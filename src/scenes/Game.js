@@ -51,7 +51,7 @@ export class Game extends Phaser.Scene {
         const pw = 496;
         const ph = 503;
         const pScale = 150 / ph;
-        const splitY = Math.round(ph * 0.63); // ~317px — centre of open mouth
+        const splitY = Math.round(ph * 0.70); // ~352px — middle of open mouth
 
         this.playerHead = this.add.image(0, 0, 'player')
             .setCrop(0, 0, pw, splitY)
