@@ -47,24 +47,20 @@ export class Game extends Phaser.Scene {
         body.setSize(100, 100);
         body.setOffset(-50, -50);
 
-        // Display parts of the face
-        // Use a dummy image just to get the dimensions
-        const dummy = this.textures.get('player').getSourceImage();
-        const pw = dummy.width;
-        const ph = dummy.height;
-
-        // Scale to a reasonable avatar size, e.g. 150px
+        // oscar.png is 496x503; mouth is ~70% down the image
+        const pw = 496;
+        const ph = 503;
         const pScale = 150 / ph;
+        const splitY = Math.round(ph * 0.70); // ~352px — centre of open mouth
 
-        // Use standard images since setCrop works on Images, and we scale them
         this.playerHead = this.add.image(0, 0, 'player')
-            .setCrop(0, 0, pw, ph / 2)
-            .setOrigin(0.5, 0.5) // Center origin for seamless overlap
+            .setCrop(0, 0, pw, splitY)
+            .setOrigin(0.5, 0.5)
             .setScale(pScale);
 
         this.playerJaw = this.add.image(0, 0, 'player')
-            .setCrop(0, ph / 2, pw, ph / 2)
-            .setOrigin(0.5, 0.5) // Center origin for seamless overlap
+            .setCrop(0, splitY, pw, ph - splitY)
+            .setOrigin(0.5, 0.5)
             .setScale(pScale);
 
         this.playerContainer.add([this.playerHead, this.playerJaw]);
