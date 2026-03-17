@@ -47,11 +47,11 @@ export class Game extends Phaser.Scene {
         body.setSize(100, 100);
         body.setOffset(-50, -50);
 
-        // oscar.png is 496x503; mouth is ~70% down the image
+        // oscar2.png is 496x503; mouth is ~63% down the image
         const pw = 496;
         const ph = 503;
         const pScale = 150 / ph;
-        const splitY = Math.round(ph * 0.70); // ~352px — centre of open mouth
+        const splitY = Math.round(ph * 0.63); // ~317px — centre of open mouth
 
         this.playerHead = this.add.image(0, 0, 'player')
             .setCrop(0, 0, pw, splitY)

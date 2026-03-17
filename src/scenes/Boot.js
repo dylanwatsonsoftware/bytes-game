@@ -7,7 +7,7 @@ export class Boot extends Phaser.Scene {
 
     preload() {
         // Load default assets
-        this.load.image('player', 'assets/oscar.png');
+        this.load.image('player', 'assets/oscar2.png');
         this.load.image('apple', 'assets/apple.png');
         this.load.image('carrot', 'assets/carrot.png');
         this.load.image('burger', 'assets/burger.png');
